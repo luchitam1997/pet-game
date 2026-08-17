@@ -3,7 +3,7 @@ import { FOODS, getPet } from '../data/catalog';
 import { computeFeedEffects } from '../domain/rewards';
 import { gameState } from '../services/GameStateService';
 import type { AppNav } from './nav';
-import { COLORS, DESIGN_HEIGHT, DESIGN_WIDTH } from './theme';
+import { COLORS, DESIGN_HEIGHT, DESIGN_WIDTH, NAV_BUTTON_Y } from './theme';
 import { createDim, createLabel, createPanel, UiButton } from './uiKit';
 
 export class FeedOverlay {
@@ -15,10 +15,10 @@ export class FeedOverlay {
     private readonly nav: AppNav,
   ) {
     createDim(parent, DESIGN_WIDTH, DESIGN_HEIGHT);
-    createPanel(parent, 'Sheet', 0, -40, 680, 980, COLORS.panel, 28);
+    createPanel(parent, 'Sheet', 0, 0, 680, 1120, COLORS.panel, 28);
     createLabel(parent, 'Title', 'Feed', {
       x: 0,
-      y: 400,
+      y: 500,
       width: 400,
       height: 48,
       fontSize: 32,
@@ -29,7 +29,7 @@ export class FeedOverlay {
     const definition = pet ? getPet(pet.definitionId) : undefined;
     createLabel(parent, 'Hint', definition ? `What should ${definition.displayName} eat?` : 'Choose a pet first.', {
       x: 0,
-      y: 350,
+      y: 450,
       width: 600,
       height: 36,
       fontSize: 18,
@@ -37,7 +37,7 @@ export class FeedOverlay {
     });
 
     FOODS.forEach((food, index) => {
-      const y = 200 - index * 180;
+      const y = 280 - index * 180;
       const panel = createPanel(parent, food.id, 0, y, 600, 160, COLORS.panelAlt);
       const effects = definition ? computeFeedEffects(definition, food) : null;
       const badge =
@@ -47,41 +47,41 @@ export class FeedOverlay {
             ? 'Not a favorite'
             : 'Okay';
       createLabel(panel, 'Name', food.displayName, {
-        x: -10,
-        y: 42,
-        width: 540,
+        x: -70,
+        y: 36,
+        width: 340,
         height: 36,
         fontSize: 24,
         bold: true,
         hAlign: HorizontalTextAlignment.LEFT,
       });
       createLabel(panel, 'Meta', `${badge} · +${effects?.stats.hunger ?? food.hungerRestore} hunger`, {
-        x: -10,
-        y: 8,
-        width: 540,
+        x: -70,
+        y: 4,
+        width: 340,
         height: 28,
         fontSize: 16,
         color: COLORS.accent,
         hAlign: HorizontalTextAlignment.LEFT,
       });
       const qty = createLabel(panel, 'Qty', '', {
-        x: -10,
-        y: -28,
-        width: 240,
+        x: -70,
+        y: -32,
+        width: 340,
         height: 28,
         fontSize: 18,
         color: COLORS.muted,
         hAlign: HorizontalTextAlignment.LEFT,
       });
       this.qtyLabels.push(qty);
-      const button = new UiButton(panel, 'Give', 'Give', 180, -28, 180, 56, COLORS.feed, () => {
+      const button = new UiButton(panel, 'Give', 'Give', 190, 0, 170, 56, COLORS.feed, () => {
         this.feed(food.id);
       });
       this.buttons.push(button);
     });
 
-    new UiButton(parent, 'Home', 'Home', -140, -520, 220, 68, COLORS.panelAlt, () => this.nav.home());
-    new UiButton(parent, 'Back', 'Back', 140, -520, 220, 68, COLORS.panelAlt, () => this.nav.back());
+    new UiButton(parent, 'Home', 'Home', -140, NAV_BUTTON_Y, 220, 68, COLORS.panelAlt, () => this.nav.home());
+    new UiButton(parent, 'Back', 'Back', 140, NAV_BUTTON_Y, 220, 68, COLORS.panelAlt, () => this.nav.back());
     this.refresh();
   }
 

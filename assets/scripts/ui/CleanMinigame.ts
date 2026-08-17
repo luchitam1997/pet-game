@@ -3,7 +3,7 @@ import { BATH_STEPS } from '../minigames/bathSteps';
 import { getPet } from '../data/catalog';
 import { gameState } from '../services/GameStateService';
 import type { AppNav } from './nav';
-import { COLORS, DESIGN_HEIGHT, DESIGN_WIDTH } from './theme';
+import { COLORS, DESIGN_HEIGHT, DESIGN_WIDTH, NAV_BUTTON_Y } from './theme';
 import { createDim, createLabel, createNode, createPanel, paintCircle, UiBar, UiButton } from './uiKit';
 
 const { ccclass } = _decorator;
@@ -25,10 +25,10 @@ export class CleanMinigame extends Component {
 
   start(): void {
     createDim(this.node, DESIGN_WIDTH, DESIGN_HEIGHT);
-    createPanel(this.node, 'Sheet', 0, 20, 680, 980, COLORS.panel, 28);
+    createPanel(this.node, 'Sheet', 0, 0, 680, 1120, COLORS.panel, 28);
     this.titleLabel = createLabel(this.node, 'Title', '', {
       x: 0,
-      y: 420,
+      y: 500,
       width: 560,
       height: 48,
       fontSize: 30,
@@ -36,14 +36,14 @@ export class CleanMinigame extends Component {
     });
     this.instructionLabel = createLabel(this.node, 'Instruction', '', {
       x: 0,
-      y: 360,
+      y: 440,
       width: 600,
       height: 48,
       fontSize: 20,
       color: COLORS.muted,
     });
 
-    const petNode = createNode(this.node, 'Pet', 0, 140, 220, 220);
+    const petNode = createNode(this.node, 'Pet', 0, 160, 220, 220);
     this.petGraphics = petNode.addComponent(Graphics);
     paintCircle(this.petGraphics, 100, COLORS.clean);
     const pet = gameState.getSelectedPet();
@@ -57,12 +57,12 @@ export class CleanMinigame extends Component {
       bold: true,
     });
 
-    this.progress = new UiBar(this.node, 'Progress', 0, -40, 560, 28, COLORS.clean);
-    this.actionBtn = new UiButton(this.node, 'Action', 'Start', 0, -140, 320, 80, COLORS.clean, () => {
+    this.progress = new UiBar(this.node, 'Progress', 0, -80, 560, 28, COLORS.clean);
+    this.actionBtn = new UiButton(this.node, 'Action', 'Start', 0, -220, 320, 80, COLORS.clean, () => {
       this.onAction();
     });
-    new UiButton(this.node, 'Home', 'Home', -140, -240, 220, 68, COLORS.panelAlt, () => this.nav?.home());
-    new UiButton(this.node, 'Back', 'Back', 140, -240, 220, 68, COLORS.panelAlt, () => this.nav?.back());
+    new UiButton(this.node, 'Home', 'Home', -140, NAV_BUTTON_Y, 220, 68, COLORS.panelAlt, () => this.nav?.home());
+    new UiButton(this.node, 'Back', 'Back', 140, NAV_BUTTON_Y, 220, 68, COLORS.panelAlt, () => this.nav?.back());
     this.renderStep();
   }
 

@@ -3,6 +3,13 @@ import { Color } from 'cc';
 export const DESIGN_WIDTH = 720;
 export const DESIGN_HEIGHT = 1280;
 
+/** Reserved strip under the canvas top so toasts never cover Hub coins or overlay titles. */
+export const TOAST_Y = 608;
+export const TOAST_WIDTH = 640;
+export const TOAST_HEIGHT = 64;
+export const HUB_HEADER_Y = 536;
+export const NAV_BUTTON_Y = -520;
+
 export const COLORS = {
   canvas: new Color(42, 38, 48, 255),
   panel: new Color(58, 52, 68, 255),

@@ -1,6 +1,6 @@
-import { HorizontalTextAlignment, Label, Node, Overflow, VerticalTextAlignment } from 'cc';
+import { BlockInputEvents, HorizontalTextAlignment, Label, Node, Overflow, VerticalTextAlignment } from 'cc';
 import type { Component } from 'cc';
-import { COLORS, DESIGN_HEIGHT, DESIGN_WIDTH } from './theme';
+import { COLORS, TOAST_HEIGHT, TOAST_WIDTH, TOAST_Y } from './theme';
 import { createLabel, createPanel } from './uiKit';
 
 export class ToastView {
@@ -14,19 +14,21 @@ export class ToastView {
     parent: Node,
     private readonly host: Component,
   ) {
-    this.panel = createPanel(parent, 'Toast', 0, 430, 640, 88, COLORS.panelAlt, 22);
+    this.panel = createPanel(parent, 'Toast', 0, TOAST_Y, TOAST_WIDTH, TOAST_HEIGHT, COLORS.panelAlt, 18);
+    this.panel.addComponent(BlockInputEvents);
     this.panel.active = false;
     this.label = createLabel(this.panel, 'Text', '', {
       x: 0,
       y: 0,
-      width: 600,
-      height: 80,
-      fontSize: 22,
+      width: TOAST_WIDTH - 40,
+      height: TOAST_HEIGHT - 8,
+      fontSize: 18,
       wrap: true,
       hAlign: HorizontalTextAlignment.CENTER,
       vAlign: VerticalTextAlignment.CENTER,
     });
     this.label.overflow = Overflow.SHRINK;
+    this.label.lineHeight = 22;
   }
 
   show(message: string): void {
@@ -37,5 +39,3 @@ export class ToastView {
     this.host.scheduleOnce(this.clear, 2.4);
   }
 }
-
-export { DESIGN_HEIGHT, DESIGN_WIDTH };

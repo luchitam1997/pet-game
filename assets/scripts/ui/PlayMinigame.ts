@@ -5,12 +5,12 @@ import { playDurationSeconds, playPrompt, playTargetLabel, playTitle, POINTS_PER
 import type { Species } from '../domain/types';
 import { gameState } from '../services/GameStateService';
 import type { AppNav } from './nav';
-import { COLORS, DESIGN_HEIGHT, DESIGN_WIDTH } from './theme';
+import { COLORS, DESIGN_HEIGHT, DESIGN_WIDTH, NAV_BUTTON_Y } from './theme';
 import { createDim, createLabel, createNode, createPanel, paintCircle, UiButton } from './uiKit';
 
 const { ccclass } = _decorator;
 
-const ARENA = { x: 260, y: 180 };
+const ARENA = { x: 244, y: 176 };
 
 @ccclass('PlayMinigame')
 export class PlayMinigame extends Component {
@@ -38,10 +38,10 @@ export class PlayMinigame extends Component {
     this.remaining = playDurationSeconds(activity?.durationSeconds);
 
     createDim(this.node, DESIGN_WIDTH, DESIGN_HEIGHT);
-    createPanel(this.node, 'Sheet', 0, 20, 680, 980, COLORS.panel, 28);
+    createPanel(this.node, 'Sheet', 0, 0, 680, 1120, COLORS.panel, 28);
     createLabel(this.node, 'Title', playTitle(this.species), {
       x: 0,
-      y: 420,
+      y: 500,
       width: 600,
       height: 48,
       fontSize: 30,
@@ -49,7 +49,7 @@ export class PlayMinigame extends Component {
     });
     this.promptLabel = createLabel(this.node, 'Prompt', playPrompt(this.species), {
       x: 0,
-      y: 370,
+      y: 450,
       width: 600,
       height: 36,
       fontSize: 20,
@@ -57,7 +57,7 @@ export class PlayMinigame extends Component {
     });
     this.timerLabel = createLabel(this.node, 'Timer', '', {
       x: -180,
-      y: 310,
+      y: 390,
       width: 240,
       height: 36,
       fontSize: 22,
@@ -65,7 +65,7 @@ export class PlayMinigame extends Component {
     });
     this.scoreLabel = createLabel(this.node, 'Score', '', {
       x: 180,
-      y: 310,
+      y: 390,
       width: 240,
       height: 36,
       fontSize: 22,
@@ -87,8 +87,8 @@ export class PlayMinigame extends Component {
     });
     this.target.on(NodeEventType.TOUCH_END, this.onCatch, this);
 
-    new UiButton(this.node, 'Home', 'Home', -140, -320, 220, 68, COLORS.panelAlt, () => this.nav?.home());
-    new UiButton(this.node, 'Back', 'Back', 140, -320, 220, 68, COLORS.panelAlt, () => this.nav?.back());
+    new UiButton(this.node, 'Home', 'Home', -140, NAV_BUTTON_Y, 220, 68, COLORS.panelAlt, () => this.nav?.home());
+    new UiButton(this.node, 'Back', 'Back', 140, NAV_BUTTON_Y, 220, 68, COLORS.panelAlt, () => this.nav?.back());
     this.moveTarget();
     this.renderHud();
   }

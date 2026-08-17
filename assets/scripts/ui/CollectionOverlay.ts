@@ -2,7 +2,7 @@ import { HorizontalTextAlignment, Node, VerticalTextAlignment } from 'cc';
 import { COSMETICS, FURNITURE } from '../data/catalog';
 import { gameState } from '../services/GameStateService';
 import type { AppNav } from './nav';
-import { COLORS, DESIGN_HEIGHT, DESIGN_WIDTH } from './theme';
+import { COLORS, DESIGN_HEIGHT, DESIGN_WIDTH, NAV_BUTTON_Y } from './theme';
 import { createDim, createLabel, createPanel, UiButton } from './uiKit';
 
 export class CollectionOverlay {
@@ -77,7 +77,7 @@ export class CollectionOverlay {
       vAlign: VerticalTextAlignment.TOP,
     });
 
-    new UiButton(parent, 'Home', 'Home', -140, -520, 220, 64, COLORS.panelAlt, () => nav.home());
-    new UiButton(parent, 'Back', 'Back', 140, -520, 220, 64, COLORS.panelAlt, () => nav.back());
+    new UiButton(parent, 'Home', 'Home', -140, NAV_BUTTON_Y, 220, 64, COLORS.panelAlt, () => nav.home());
+    new UiButton(parent, 'Back', 'Back', 140, NAV_BUTTON_Y, 220, 64, COLORS.panelAlt, () => nav.back());
   }
 }

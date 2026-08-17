@@ -46,17 +46,19 @@ export function createLabel(
     hAlign?: HorizontalTextAlignment;
     vAlign?: VerticalTextAlignment;
     wrap?: boolean;
+    overflow?: Overflow;
+    lineHeight?: number;
   },
 ): Label {
   const node = createNode(parent, name, options.x, options.y, options.width, options.height);
   const label = node.addComponent(Label);
   label.string = text;
   label.fontSize = options.fontSize;
-  label.lineHeight = options.fontSize + 6;
+  label.lineHeight = options.lineHeight ?? options.fontSize + 6;
   label.useSystemFont = true;
   label.isBold = options.bold ?? false;
   label.color = options.color ?? COLORS.text;
-  label.overflow = Overflow.CLAMP;
+  label.overflow = options.overflow ?? Overflow.CLAMP;
   label.enableWrapText = options.wrap ?? true;
   label.horizontalAlign = options.hAlign ?? HorizontalTextAlignment.CENTER;
   label.verticalAlign = options.vAlign ?? VerticalTextAlignment.CENTER;
@@ -114,7 +116,7 @@ export class UiButton {
   private enabled = true;
   private onTap: () => void;
 
-    constructor(
+  constructor(
     parent: Node,
     name: string,
     text: string,
@@ -125,6 +127,7 @@ export class UiButton {
     color: Color,
     onTap: () => void,
     fontSize = 24,
+    wrap = false,
   ) {
     this.width = width;
     this.height = height;
@@ -137,10 +140,13 @@ export class UiButton {
     this.label = createLabel(this.node, 'Label', text, {
       x: 0,
       y: 0,
-      width,
-      height,
+      width: width - 16,
+      height: height - 8,
       fontSize,
       bold: true,
+      wrap,
+      overflow: wrap ? Overflow.CLAMP : Overflow.SHRINK,
+      lineHeight: fontSize + 4,
     });
     this.node.on(NodeEventType.TOUCH_END, this.handleTap, this);
   }
