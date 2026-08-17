@@ -2,7 +2,7 @@
 
 Cozy pet-care prototype for **Cocos Creator 3.8.8** + TypeScript. Mobile-first web, portrait 9:16. Design: [pet-casual-cozy-gdd.md](pet-casual-cozy-gdd.md).
 
-This repo currently implements **Phase 1 — Foundation**: catalogs, domain rules, save/load, and a debug HUD. Hub UI, mini-games, Style/Room overlays, and art come in later phases.
+Current scope: **Phase 2 — Hub and care loop**. Style/Room overlays and real art come in Phase 3–4.
 
 ## Assumptions
 
@@ -10,8 +10,9 @@ This repo currently implements **Phase 1 — Foundation**: catalogs, domain rule
 - No backend, login, payment, gacha, or multiplayer.
 - Pet never dies. Stats stay in `0..100`. Offline decay is slow and capped.
 - Cosmetic/furniture content is data-driven. UI must read catalogs, not hard-coded item lists.
-- Missing art is OK: Phase 1 uses labels and colored buttons. Keep `assetKey` values stable when replacing placeholders later.
+- Missing art is OK: placeholders are colored shapes and labels. Keep `assetKey` values stable.
 - Save key: `pet-haven-save` in `sys.localStorage`.
+- New saves start with no pet selected. A save from Phase 1 that already has a pet still loads into the Hub.
 
 ## Architecture
 
@@ -21,7 +22,8 @@ assets/scripts/
   domain/        types, clamp/decay, feed rewards, equip/room checks
   services/      GameStateService, SaveService, ClockService
   events/        typed EventBus (pet/inventory/currency/room only)
-  ui/            GameBootstrap debug HUD (not the real Hub)
+  minigames/     bath steps + catch-toy rules (no Cocos types)
+  ui/            Hub, overlays, mini-games, uiKit
 ```
 
 `Component` code only calls services and renders. Stat rules and persistence live in `domain/` + `services/`.
@@ -37,14 +39,14 @@ assets/scripts/
 | Seasonal pack | 1 | `pack_autumn_cozy` |
 | Room anchors | 4 | `left`, `center`, `right`, `floor` |
 
-Starter save: Mochi selected, sailor hat equipped, cozy bed on `floor`, 40 coins, 5 of each food.
+Starter inventory: 5 of each food, sailor hat equipped on Mochi, cozy bed on `floor`, 40 coins. You pick a pet before the Hub care loop.
 
 ## Scene / prefab contract
 
 | Asset | Role |
 | --- | --- |
 | [assets/scenes/Main.scene](assets/scenes/Main.scene) | Portrait canvas 720×1280 with `GameBootstrap` on Canvas |
-| Prefabs | None in Phase 1. HUD is built in code |
+| Prefabs | None. Hub and overlays are built in code |
 
 If the script is missing on Canvas after import:
 
@@ -59,11 +61,11 @@ If the script is missing on Canvas after import:
 2. Wait until assets finish importing.
 3. Open `assets/scenes/Main.scene`.
 4. Click **Preview** (browser). Use a 9:16 device preset if available.
-5. Tap **Feed / Equip / Place / Rest**, then reload the tab. Coins, stats, equipment, and room should remain.
+5. Choose Mochi or Miso → Feed / Clean / Play / Rest. Reload the tab: stats, coins, and daily progress remain.
 
-`Dog hoodie` is a compatibility check: it equips on Mochi and is rejected on Miso.
+Play is a 20–60s tap game (ball for dog, spark for cat). Clean is rinse → scrub → dry. Rest disables when energy is 90+. Style and Room show a Phase 3 placeholder with Back.
 
-To wipe progress, in the browser console:
+To wipe progress:
 
 ```js
 localStorage.removeItem('pet-haven-save');
@@ -75,12 +77,12 @@ localStorage.removeItem('pet-haven-save');
 - Furniture: append in [assets/scripts/data/furniture.ts](assets/scripts/data/furniture.ts) and list `allowedAnchors`.
 - Seasonal: add ids to the item definitions (`seasonalPackId`) and list those ids in [assets/scripts/data/seasonalPacks.ts](assets/scripts/data/seasonalPacks.ts).
 - Pet/food: [assets/scripts/data/pets.ts](assets/scripts/data/pets.ts), [assets/scripts/data/foods.ts](assets/scripts/data/foods.ts).
+- Daily objectives: [assets/scripts/data/dailyObjectives.ts](assets/scripts/data/dailyObjectives.ts). Hub lists whatever is in that catalog.
 
 Do not put item lists in UI scripts. Look up by id from [assets/scripts/data/catalog.ts](assets/scripts/data/catalog.ts).
 
-## Phase 1 limits
+## Phase 2 limits
 
-- Debug HUD only (no Hub, Style, or Room overlay).
+- Style and Room are placeholders (data and save already support them).
 - No sprite/animation assets yet; keys are reserved.
-- Play/Clean service APIs exist (`completePlay`, `completeClean`) but have no mini-game UI.
-- Daily objectives are tracked in save data; no objective panel yet.
+- Collection is a count line on the Hub, not a full album screen.
