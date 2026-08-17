@@ -1,8 +1,8 @@
 import { Graphics, HorizontalTextAlignment, Label, Node, NodeEventType, VerticalTextAlignment } from 'cc';
-import { DAILY_OBJECTIVES, FOODS, getCosmetic, getPet } from '../data/catalog';
+import { COSMETICS, DAILY_OBJECTIVES, FURNITURE, getCosmetic, getFurniture, getPet } from '../data/catalog';
 import { careHint } from '../domain/careHint';
 import { REST_ENERGY_BLOCK_AT } from '../domain/stats';
-import type { PetState } from '../domain/types';
+import { ROOM_ANCHORS, type PetState } from '../domain/types';
 import { gameState } from '../services/GameStateService';
 import type { AppNav } from './nav';
 import { COLORS } from './theme';
@@ -127,9 +127,10 @@ export class HubScreen {
       width: 620,
       height: 28,
       fontSize: 16,
-      color: COLORS.muted,
+      color: COLORS.accent,
       hAlign: HorizontalTextAlignment.LEFT,
     });
+    this.collectionLabel.node.on(NodeEventType.TOUCH_END, () => this.nav.openCollection());
 
     this.feedBtn = new UiButton(root, 'Feed', 'Feed', -216, -430, 200, 76, COLORS.feed, () => {
       if (!this.ensurePet()) {
@@ -159,8 +160,16 @@ export class HubScreen {
     this.restBtn = new UiButton(root, 'Rest', 'Rest', -216, -530, 200, 76, COLORS.rest, () => {
       this.rest();
     });
-    new UiButton(root, 'Style', 'Style', 0, -530, 200, 76, COLORS.style, () => this.nav.openStyle());
-    new UiButton(root, 'Room', 'Room', 216, -530, 200, 76, COLORS.room, () => this.nav.openRoom());
+    new UiButton(root, 'Style', 'Style', 0, -530, 200, 76, COLORS.style, () => {
+      if (this.ensurePet()) {
+        this.nav.openStyle();
+      }
+    });
+    new UiButton(root, 'Room', 'Room', 216, -530, 200, 76, COLORS.room, () => {
+      if (this.ensurePet()) {
+        this.nav.openRoom();
+      }
+    });
 
     this.refresh();
   }
@@ -170,9 +179,11 @@ export class HubScreen {
     const pet = gameState.getSelectedPet();
     const definition = pet ? getPet(pet.definitionId) : undefined;
 
+    const ownedCosmetics = save.inventory.cosmetics.length;
+    const ownedFurniture = save.inventory.furniture.length;
     this.coinLabel.string = `${save.coins} c`;
     this.affectionLabel.string = pet ? `♥ ${pet.stats.affection}` : '♥ 0';
-    this.collectionLabel.string = `Collection ${save.unlockedCollection.length} · food types ${FOODS.length}`;
+    this.collectionLabel.string = `Collection ${ownedCosmetics}/${COSMETICS.length} looks · ${ownedFurniture}/${FURNITURE.length} furniture · tap`;
     this.dailyLabel.string = formatDaily(save.dailyObjectives.progress, save.dailyObjectives.completed);
 
     if (!pet || !definition) {
@@ -193,7 +204,7 @@ export class HubScreen {
     this.speciesLabel.string = `${definition.species} · ${definition.personality}`;
     this.petLetter.string = definition.displayName.slice(0, 1);
     paintCircle(this.petGraphics, 120, definition.species === 'cat' ? COLORS.cat : COLORS.dog);
-    this.equippedLabel.string = formatEquipped(pet);
+    this.equippedLabel.string = `${formatEquipped(pet)} · ${formatRoom(save.room.placements)}`;
     this.hintLabel.string = careHint(definition.displayName, pet.stats);
     this.setBars(pet);
     this.feedBtn.setEnabled(gameState.hasAnyFood());
@@ -244,10 +255,22 @@ function formatEquipped(pet: PetState): string {
   return parts.length > 0 ? parts.join(' · ') : 'No accessories yet';
 }
 
+function formatRoom(placements: Partial<Record<(typeof ROOM_ANCHORS)[number], string>>): string {
+  const parts = ROOM_ANCHORS.map((anchor) => {
+    const id = placements[anchor];
+    if (!id) {
+      return null;
+    }
+    return `${anchor}: ${getFurniture(id)?.displayName ?? id}`;
+  }).filter((part): part is string => part !== null);
+  return parts.length > 0 ? parts.join(' · ') : 'room empty';
+}
+
 function formatDaily(progress: Record<string, number>, completed: string[]): string {
   return DAILY_OBJECTIVES.map((objective) => {
     const current = Math.min(progress[objective.id] ?? 0, objective.target);
     const mark = completed.includes(objective.id) ? '✓' : '·';
     return `${mark} ${objective.description} (${current}/${objective.target})`;
-  })    .join('\n');
+  })
+    .join('\n');
 }

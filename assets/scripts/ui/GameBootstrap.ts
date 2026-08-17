@@ -2,12 +2,14 @@ import { _decorator, Component, Node, ResolutionPolicy, view } from 'cc';
 import { gameEvents } from '../events/EventBus';
 import { gameState } from '../services/GameStateService';
 import { CleanMinigame } from './CleanMinigame';
-import { ComingSoonOverlay } from './ComingSoonOverlay';
+import { CollectionOverlay } from './CollectionOverlay';
 import { FeedOverlay } from './FeedOverlay';
 import { HubScreen } from './HubScreen';
 import type { AppNav } from './nav';
 import { PetSelectScreen } from './PetSelectScreen';
 import { PlayMinigame } from './PlayMinigame';
+import { RoomOverlay } from './RoomOverlay';
+import { StyleOverlay } from './StyleOverlay';
 import { DESIGN_HEIGHT, DESIGN_WIDTH } from './theme';
 import { ToastView } from './ToastView';
 import { createNode } from './uiKit';
@@ -23,7 +25,14 @@ export class GameBootstrap extends Component implements AppNav {
 
   start(): void {
     view.setDesignResolutionSize(DESIGN_WIDTH, DESIGN_HEIGHT, ResolutionPolicy.FIXED_WIDTH);
-    gameState.boot();
+    try {
+      gameState.boot();
+    } catch (error) {
+      console.error('[Pet Haven] Failed to boot save', error);
+      this.toastView = new ToastView(this.node, this);
+      this.toast('Could not load save. Starting fresh after a refresh may help.');
+      return;
+    }
 
     const hubNode = createNode(this.node, 'Hub', 0, 0, DESIGN_WIDTH, DESIGN_HEIGHT);
     this.hub = new HubScreen(hubNode, this);
@@ -86,11 +95,15 @@ export class GameBootstrap extends Component implements AppNav {
   }
 
   openStyle(): void {
-    this.showOverlay((root) => new ComingSoonOverlay(root, this, 'Style'));
+    this.showOverlay((root) => new StyleOverlay(root, this));
   }
 
   openRoom(): void {
-    this.showOverlay((root) => new ComingSoonOverlay(root, this, 'Room'));
+    this.showOverlay((root) => new RoomOverlay(root, this));
+  }
+
+  openCollection(): void {
+    this.showOverlay((root) => new CollectionOverlay(root, this));
   }
 
   private showOverlay(build: (root: Node) => void): void {
@@ -110,3 +123,4 @@ export class GameBootstrap extends Component implements AppNav {
     return root;
   }
 }
+

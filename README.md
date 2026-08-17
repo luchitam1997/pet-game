@@ -2,7 +2,7 @@
 
 Cozy pet-care prototype for **Cocos Creator 3.8.8** + TypeScript. Mobile-first web, portrait 9:16. Design: [pet-casual-cozy-gdd.md](pet-casual-cozy-gdd.md).
 
-Current scope: **Phase 2 — Hub and care loop**. Style/Room overlays and real art come in Phase 3–4.
+**MVP is playable:** choose a pet, care (Feed / Clean / Play / Rest), earn coins, equip cosmetics, place furniture. Style/Room read catalogs; adding an item does not require service changes.
 
 ## Assumptions
 
@@ -10,9 +10,9 @@ Current scope: **Phase 2 — Hub and care loop**. Style/Room overlays and real a
 - No backend, login, payment, gacha, or multiplayer.
 - Pet never dies. Stats stay in `0..100`. Offline decay is slow and capped.
 - Cosmetic/furniture content is data-driven. UI must read catalogs, not hard-coded item lists.
-- Missing art is OK: placeholders are colored shapes and labels. Keep `assetKey` values stable.
+- Missing art is OK: placeholders are colored shapes and labels. Keep `assetKey` values stable when you drop in SpriteFrames later.
 - Save key: `pet-haven-save` in `sys.localStorage`.
-- New saves start with no pet selected. A save from Phase 1 that already has a pet still loads into the Hub.
+- New saves start with no pet selected. A save that already has a pet loads into the Hub.
 
 ## Architecture
 
@@ -38,8 +38,9 @@ assets/scripts/
 | Furniture | 6 | bed, plant, window perch, cushion, lamp, autumn rug (seasonal) |
 | Seasonal pack | 1 | `pack_autumn_cozy` |
 | Room anchors | 4 | `left`, `center`, `right`, `floor` |
+| Style slots (MVP UI) | 3 | `head`, `neck`, `body` (catalog also has `back`, `face`, `paw`) |
 
-Starter inventory: 5 of each food, sailor hat equipped on Mochi, cozy bed on `floor`, 40 coins. You pick a pet before the Hub care loop.
+Starter inventory: 5 of each food, sailor hat + bandana + hoodie owned, cozy bed + plant owned, 40 coins. Mochi starts with the sailor hat equipped; bed is on `floor`.
 
 ## Scene / prefab contract
 
@@ -55,15 +56,24 @@ If the script is missing on Canvas after import:
 3. Add Component → Custom Script → `GameBootstrap`.
 4. Save the scene.
 
+Replace a placeholder later by mapping `assetKey` (for example `cosmetic/sailor_hat`) to a SpriteFrame or Prefab of the same key. Do not rename ids.
+
 ## How to run
 
 1. Open this folder in **Cocos Creator 3.8.8**.
 2. Wait until assets finish importing.
 3. Open `assets/scenes/Main.scene`.
 4. Click **Preview** (browser). Use a 9:16 device preset if available.
-5. Choose Mochi or Miso → Feed / Clean / Play / Rest. Reload the tab: stats, coins, and daily progress remain.
 
-Play is a 20–60s tap game (ball for dog, spark for cat). Clean is rinse → scrub → dry. Rest disables when energy is 90+. Style and Room show a Phase 3 placeholder with Back.
+New-player path (under two minutes):
+
+1. Choose Mochi or Miso.
+2. Feed a favorite food, finish a 3-step bath, play the tap game, or Rest.
+3. Open **Style**, equip or buy a look (wrong species shows toast and does not equip).
+4. Open **Room**, select an anchor, place owned furniture (invalid anchors are rejected; placing on an occupied anchor replaces).
+5. Reload the tab — pet, coins, equipment, and room remain.
+
+Play is a 20–60s tap game (ball for dog, spark for cat). Clean is rinse → scrub → dry. Rest disables when energy is 90+. Tap the collection line on the Hub for owned vs locked items.
 
 To wipe progress:
 
@@ -71,18 +81,19 @@ To wipe progress:
 localStorage.removeItem('pet-haven-save');
 ```
 
-## Adding content (no service changes)
+## Adding content (no service or UI list changes)
 
-- Cosmetic: append a `CosmeticDefinition` in [assets/scripts/data/cosmetics.ts](assets/scripts/data/cosmetics.ts). Use a stable `id` and `assetKey`.
-- Furniture: append in [assets/scripts/data/furniture.ts](assets/scripts/data/furniture.ts) and list `allowedAnchors`.
-- Seasonal: add ids to the item definitions (`seasonalPackId`) and list those ids in [assets/scripts/data/seasonalPacks.ts](assets/scripts/data/seasonalPacks.ts).
+- Cosmetic: append a `CosmeticDefinition` in [assets/scripts/data/cosmetics.ts](assets/scripts/data/cosmetics.ts) with a stable `id`, `slot`, `species`, `assetKey`, and optional `priceCoins` / `seasonalPackId`.
+- Furniture: append in [assets/scripts/data/furniture.ts](assets/scripts/data/furniture.ts) with `allowedAnchors` and `assetKey`.
+- Seasonal: set `seasonalPackId` on items and list those ids in [assets/scripts/data/seasonalPacks.ts](assets/scripts/data/seasonalPacks.ts).
 - Pet/food: [assets/scripts/data/pets.ts](assets/scripts/data/pets.ts), [assets/scripts/data/foods.ts](assets/scripts/data/foods.ts).
-- Daily objectives: [assets/scripts/data/dailyObjectives.ts](assets/scripts/data/dailyObjectives.ts). Hub lists whatever is in that catalog.
+- Daily objectives: [assets/scripts/data/dailyObjectives.ts](assets/scripts/data/dailyObjectives.ts). Hub and Style/Room iterate the catalogs.
 
 Do not put item lists in UI scripts. Look up by id from [assets/scripts/data/catalog.ts](assets/scripts/data/catalog.ts).
 
-## Phase 2 limits
+## MVP limits
 
-- Style and Room are placeholders (data and save already support them).
-- No sprite/animation assets yet; keys are reserved.
-- Collection is a count line on the Hub, not a full album screen.
+- Placeholder art only (no SpriteFrame swap wired yet; keys are reserved).
+- Collection is a catalog checklist, not a photo album.
+- Face/back/paw cosmetics exist in data; Style filters highlight head/neck/body first.
+- No real payments, ads, or cloud save.

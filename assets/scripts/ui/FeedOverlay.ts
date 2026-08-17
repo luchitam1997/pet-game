@@ -80,7 +80,8 @@ export class FeedOverlay {
       this.buttons.push(button);
     });
 
-    new UiButton(parent, 'Back', 'Back', 0, -520, 240, 68, COLORS.panelAlt, () => nav.back());
+    new UiButton(parent, 'Home', 'Home', -140, -520, 220, 68, COLORS.panelAlt, () => this.nav.home());
+    new UiButton(parent, 'Back', 'Back', 140, -520, 220, 68, COLORS.panelAlt, () => this.nav.back());
     this.refresh();
   }
 

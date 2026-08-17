@@ -87,7 +87,8 @@ export class PlayMinigame extends Component {
     });
     this.target.on(NodeEventType.TOUCH_END, this.onCatch, this);
 
-    new UiButton(this.node, 'Back', 'Back', 0, -320, 240, 68, COLORS.panelAlt, () => this.nav?.back());
+    new UiButton(this.node, 'Home', 'Home', -140, -320, 220, 68, COLORS.panelAlt, () => this.nav?.home());
+    new UiButton(this.node, 'Back', 'Back', 140, -320, 220, 68, COLORS.panelAlt, () => this.nav?.back());
     this.moveTarget();
     this.renderHud();
   }
