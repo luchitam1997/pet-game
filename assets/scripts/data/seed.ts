@@ -26,7 +26,7 @@ export function createSeedSave(now: number, dateKey: string): GameSave {
   return {
     saveVersion: SAVE_VERSION,
     coins: 40,
-    selectedPetId: PET_MOCHI_ID,
+    selectedPetId: null,
     pets: {
       [PET_MOCHI_ID]: mochi,
       [PET_MISO_ID]: miso,

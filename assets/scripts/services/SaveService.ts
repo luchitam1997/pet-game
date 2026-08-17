@@ -165,8 +165,7 @@ export function normalizeSave(raw: unknown, now: number, dateKey: string): GameS
   }
 
   const selectedPetId = typeof raw.selectedPetId === 'string' ? raw.selectedPetId : null;
-  const resolvedSelected =
-    selectedPetId && pets[selectedPetId] ? selectedPetId : Object.keys(pets)[0] ?? null;
+  const resolvedSelected = selectedPetId && pets[selectedPetId] ? selectedPetId : null;
 
   return {
     saveVersion: SAVE_VERSION,

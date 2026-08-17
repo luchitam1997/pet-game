@@ -63,6 +63,34 @@ export class GameStateService {
     return state.pets[state.selectedPetId] ?? null;
   }
 
+  hasAnyFood(): boolean {
+    const food = this.requireState().inventory.food;
+    return Object.keys(food).some((id) => (food[id] ?? 0) > 0);
+  }
+
+  canRest(): boolean {
+    const pet = this.getSelectedPet();
+    return !!pet && pet.stats.energy < REST_ENERGY_BLOCK_AT;
+  }
+
+  canPlay(): boolean {
+    const pet = this.getSelectedPet();
+    const activity = getActivity(ACTIVITY_PLAY_ID);
+    if (!pet) {
+      return false;
+    }
+    const cost = activity?.energyCost ?? 0;
+    return pet.stats.energy >= cost;
+  }
+
+  restBlockReason(): string {
+    return `Already rested enough (energy ${REST_ENERGY_BLOCK_AT}+).`;
+  }
+
+  playBlockReason(): string {
+    return 'Too tired to play right now.';
+  }
+
   selectPet(definitionId: string): ActionResult {
     const definition = getPet(definitionId);
     if (!definition) {
