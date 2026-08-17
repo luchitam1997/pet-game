@@ -1,10 +1,10 @@
-import { Color, Label, Node } from 'cc';
+import { Color, HorizontalTextAlignment, Label, Node } from 'cc';
 import { FURNITURE, getFurniture } from '../data/catalog';
 import { evaluatePlacement } from '../domain/room';
 import { ROOM_ANCHORS, type FurnitureDefinition, type RoomAnchor } from '../domain/types';
 import { gameState } from '../services/GameStateService';
 import type { AppNav } from './nav';
-import { COLORS, DESIGN_HEIGHT, DESIGN_WIDTH } from './theme';
+import { COLORS, DESIGN_HEIGHT, DESIGN_WIDTH, NAV_BUTTON_Y } from './theme';
 import { createDim, createLabel, createNode, createPanel, UiButton } from './uiKit';
 
 const ANCHOR_LAYOUT: Record<RoomAnchor, { x: number; y: number }> = {
@@ -67,7 +67,8 @@ export class RoomOverlay {
           this.selected = anchor;
           this.render();
         },
-        18,
+        16,
+        true,
       );
     }
 
@@ -77,8 +78,8 @@ export class RoomOverlay {
       this.nav.toast(result.message);
       this.render();
     }, 18);
-    new UiButton(parent, 'Home', 'Home', -140, -520, 220, 64, COLORS.panelAlt, () => this.nav.home());
-    new UiButton(parent, 'Back', 'Back', 140, -520, 220, 64, COLORS.panelAlt, () => this.nav.back());
+    new UiButton(parent, 'Home', 'Home', -140, NAV_BUTTON_Y, 220, 64, COLORS.panelAlt, () => this.nav.home());
+    new UiButton(parent, 'Back', 'Back', 140, NAV_BUTTON_Y, 220, 64, COLORS.panelAlt, () => this.nav.back());
     this.render();
   }
 
@@ -91,7 +92,7 @@ export class RoomOverlay {
       const placedId = save.room.placements[anchor];
       const name = placedId ? getFurniture(placedId)?.displayName ?? placedId : 'empty';
       const button = this.anchorButtons[anchor];
-      button?.setLabel(`${anchor}: ${name}`);
+      button?.setLabel(`${anchor}\n${name}`);
       button?.setColor(anchor === this.selected ? COLORS.room : COLORS.panelAlt);
     }
 
@@ -123,8 +124,8 @@ export class RoomOverlay {
     ownedIds: string[],
     placements: Partial<Record<RoomAnchor, string>>,
   ): void {
-    const y = 160 - index * 70;
-    const panel = createPanel(this.listRoot, item.id, 0, y, 620, 64, COLORS.panelAlt, 14);
+    const y = 168 - index * 68;
+    const panel = createPanel(this.listRoot, item.id, 0, y, 620, 62, COLORS.panelAlt, 14);
     const owned = ownedIds.includes(item.id);
     const placedOn = ROOM_ANCHORS.find((anchor) => placements[anchor] === item.id);
     const check = evaluatePlacement(item, this.selected);
@@ -136,6 +137,7 @@ export class RoomOverlay {
       height: 24,
       fontSize: 17,
       bold: true,
+      hAlign: HorizontalTextAlignment.LEFT,
     });
     createLabel(panel, 'Meta', `${item.allowedAnchors.join(', ')}${seasonal}${placedOn ? ` · on ${placedOn}` : ''}`, {
       x: -90,
@@ -144,6 +146,7 @@ export class RoomOverlay {
       height: 20,
       fontSize: 13,
       color: COLORS.muted,
+      hAlign: HorizontalTextAlignment.LEFT,
     });
 
     const action = this.rowAction(item, owned, placedOn, check.ok, check.reason, coins);

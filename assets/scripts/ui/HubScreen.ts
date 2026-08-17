@@ -1,11 +1,11 @@
-import { Graphics, HorizontalTextAlignment, Label, Node, NodeEventType, VerticalTextAlignment } from 'cc';
-import { COSMETICS, DAILY_OBJECTIVES, FURNITURE, getCosmetic, getFurniture, getPet } from '../data/catalog';
+import { Graphics, HorizontalTextAlignment, Label, Node, NodeEventType, Overflow, VerticalTextAlignment } from 'cc';
+import { COSMETICS, DAILY_OBJECTIVES, FURNITURE, getCosmetic, getPet } from '../data/catalog';
 import { careHint } from '../domain/careHint';
 import { REST_ENERGY_BLOCK_AT } from '../domain/stats';
 import { ROOM_ANCHORS, type PetState } from '../domain/types';
 import { gameState } from '../services/GameStateService';
 import type { AppNav } from './nav';
-import { COLORS } from './theme';
+import { COLORS, HUB_HEADER_Y } from './theme';
 import { createLabel, createNode, createPanel, paintCircle, UiBar, UiButton } from './uiKit';
 
 export class HubScreen {
@@ -33,7 +33,7 @@ export class HubScreen {
   ) {
     createLabel(root, 'Title', 'Pet Haven', {
       x: 0,
-      y: 580,
+      y: HUB_HEADER_Y,
       width: 280,
       height: 48,
       fontSize: 32,
@@ -41,7 +41,7 @@ export class HubScreen {
     });
     this.coinLabel = createLabel(root, 'Coins', '', {
       x: -240,
-      y: 580,
+      y: HUB_HEADER_Y,
       width: 180,
       height: 40,
       fontSize: 22,
@@ -50,7 +50,7 @@ export class HubScreen {
     });
     this.affectionLabel = createLabel(root, 'Affection', '', {
       x: 240,
-      y: 580,
+      y: HUB_HEADER_Y,
       width: 180,
       height: 40,
       fontSize: 22,
@@ -94,6 +94,8 @@ export class HubScreen {
       height: 28,
       fontSize: 16,
       color: COLORS.muted,
+      wrap: false,
+      overflow: Overflow.SHRINK,
     });
 
     const stats = createPanel(root, 'Stats', 0, -130, 660, 220);
@@ -113,22 +115,25 @@ export class HubScreen {
     const daily = createPanel(root, 'Daily', 0, -318, 660, 128, COLORS.panelAlt);
     this.dailyLabel = createLabel(daily, 'DailyText', '', {
       x: 0,
-      y: 12,
+      y: 16,
       width: 620,
-      height: 88,
-      fontSize: 16,
+      height: 76,
+      fontSize: 15,
+      lineHeight: 18,
       color: COLORS.muted,
       vAlign: VerticalTextAlignment.TOP,
       hAlign: HorizontalTextAlignment.LEFT,
     });
     this.collectionLabel = createLabel(daily, 'Collection', '', {
       x: 0,
-      y: -36,
+      y: -46,
       width: 620,
-      height: 28,
+      height: 24,
       fontSize: 16,
       color: COLORS.accent,
       hAlign: HorizontalTextAlignment.LEFT,
+      wrap: false,
+      overflow: Overflow.SHRINK,
     });
     this.collectionLabel.node.on(NodeEventType.TOUCH_END, () => this.nav.openCollection());
 
@@ -256,14 +261,8 @@ function formatEquipped(pet: PetState): string {
 }
 
 function formatRoom(placements: Partial<Record<(typeof ROOM_ANCHORS)[number], string>>): string {
-  const parts = ROOM_ANCHORS.map((anchor) => {
-    const id = placements[anchor];
-    if (!id) {
-      return null;
-    }
-    return `${anchor}: ${getFurniture(id)?.displayName ?? id}`;
-  }).filter((part): part is string => part !== null);
-  return parts.length > 0 ? parts.join(' · ') : 'room empty';
+  const filled = ROOM_ANCHORS.filter((anchor) => placements[anchor]).length;
+  return filled > 0 ? `Room ${filled}/${ROOM_ANCHORS.length}` : 'room empty';
 }
 
 function formatDaily(progress: Record<string, number>, completed: string[]): string {

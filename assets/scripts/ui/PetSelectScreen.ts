@@ -2,7 +2,7 @@ import { Node } from 'cc';
 import { PETS } from '../data/catalog';
 import { gameState } from '../services/GameStateService';
 import type { AppNav } from './nav';
-import { COLORS, DESIGN_HEIGHT, DESIGN_WIDTH } from './theme';
+import { COLORS, DESIGN_HEIGHT, DESIGN_WIDTH, NAV_BUTTON_Y } from './theme';
 import { createDim, createLabel, createPanel, UiButton } from './uiKit';
 
 export class PetSelectScreen {
@@ -63,7 +63,7 @@ export class PetSelectScreen {
     });
 
     if (!required) {
-      new UiButton(parent, 'Back', 'Back', 0, -520, 240, 68, COLORS.panelAlt, () => nav.back());
+      new UiButton(parent, 'Back', 'Back', 0, NAV_BUTTON_Y, 240, 68, COLORS.panelAlt, () => nav.back());
     }
   }
 }

@@ -1,10 +1,10 @@
-import { Color, Graphics, Label, Node } from 'cc';
+import { Color, Graphics, HorizontalTextAlignment, Label, Node, Overflow } from 'cc';
 import { COSMETICS, getPet } from '../data/catalog';
 import { evaluateEquip } from '../domain/equipment';
 import type { CosmeticDefinition, CosmeticSlot, PetDefinition, PetState } from '../domain/types';
 import { gameState } from '../services/GameStateService';
 import type { AppNav } from './nav';
-import { COLORS, DESIGN_HEIGHT, DESIGN_WIDTH } from './theme';
+import { COLORS, DESIGN_HEIGHT, DESIGN_WIDTH, NAV_BUTTON_Y } from './theme';
 import { createDim, createLabel, createNode, createPanel, paintCircle, UiButton } from './uiKit';
 
 const MVP_SLOTS: CosmeticSlot[] = ['head', 'neck', 'body'];
@@ -61,6 +61,8 @@ export class StyleOverlay {
       height: 40,
       fontSize: 16,
       color: COLORS.muted,
+      wrap: false,
+      overflow: Overflow.SHRINK,
     });
 
     const filters: StyleFilter[] = ['head', 'neck', 'body', 'all'];
@@ -91,8 +93,8 @@ export class StyleOverlay {
     });
     this.emptyLabel.node.active = false;
 
-    new UiButton(parent, 'Home', 'Home', -140, -520, 220, 64, COLORS.panelAlt, () => this.nav.home());
-    new UiButton(parent, 'Back', 'Back', 140, -520, 220, 64, COLORS.panelAlt, () => this.nav.back());
+    new UiButton(parent, 'Home', 'Home', -140, NAV_BUTTON_Y, 220, 64, COLORS.panelAlt, () => this.nav.home());
+    new UiButton(parent, 'Back', 'Back', 140, NAV_BUTTON_Y, 220, 64, COLORS.panelAlt, () => this.nav.back());
 
     this.render();
   }
@@ -145,36 +147,52 @@ export class StyleOverlay {
     coins: number,
     ownedIds: string[],
   ): void {
-    const y = this.filter === 'all' ? 180 - Math.floor(index / 2) * 118 : 190 - index * 118;
-    const x = this.filter === 'all' ? (index % 2 === 0 ? -155 : 155) : 0;
-    const width = this.filter === 'all' ? 300 : 620;
+    const compact = this.filter === 'all';
+    const y = compact ? 186 - Math.floor(index / 2) * 122 : 190 - index * 118;
+    const x = compact ? (index % 2 === 0 ? -155 : 155) : 0;
+    const width = compact ? 300 : 620;
     const panel = createPanel(this.listRoot, item.id, x, y, width, 108, COLORS.panelAlt, 16);
     const owned = ownedIds.includes(item.id);
     const equipped = pet.equipped[item.slot] === item.id;
     const check = evaluateEquip(item, definition, item.slot);
     const seasonal = item.seasonalPackId ? ' · seasonal' : '';
+    const textWidth = compact ? width - 24 : width - 220;
+    const textX = compact ? 0 : -80;
     createLabel(panel, 'Name', item.displayName, {
-      x: -10,
-      y: 28,
-      width: width - 40,
-      height: 28,
-      fontSize: 18,
+      x: textX,
+      y: compact ? 30 : 16,
+      width: textWidth,
+      height: 26,
+      fontSize: compact ? 16 : 18,
       bold: true,
+      hAlign: compact ? HorizontalTextAlignment.CENTER : HorizontalTextAlignment.LEFT,
     });
     createLabel(panel, 'Meta', `${item.slot} · ${item.species.join('/')}${seasonal}`, {
-      x: -10,
-      y: 4,
-      width: width - 40,
-      height: 22,
-      fontSize: 14,
+      x: textX,
+      y: compact ? 6 : -14,
+      width: textWidth,
+      height: 20,
+      fontSize: compact ? 12 : 14,
       color: COLORS.muted,
+      hAlign: compact ? HorizontalTextAlignment.CENTER : HorizontalTextAlignment.LEFT,
     });
 
     const action = this.rowAction(item, owned, equipped, check.ok, check.reason, coins);
-    new UiButton(panel, 'Action', action.label, width / 2 - 80, -28, 140, 44, action.color, () => {
-      this.nav.toast(action.run());
-      this.render();
-    }, 16).setEnabled(action.enabled);
+    new UiButton(
+      panel,
+      'Action',
+      action.label,
+      compact ? 0 : 210,
+      compact ? -30 : 0,
+      compact ? 260 : 150,
+      compact ? 40 : 44,
+      action.color,
+      () => {
+        this.nav.toast(action.run());
+        this.render();
+      },
+      16,
+    ).setEnabled(action.enabled);
   }
 
   private rowAction(
