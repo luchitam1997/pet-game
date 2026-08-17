@@ -8,4 +8,5 @@ export interface AppNav {
   openPlay(): void;
   openStyle(): void;
   openRoom(): void;
+  openCollection(): void;
 }

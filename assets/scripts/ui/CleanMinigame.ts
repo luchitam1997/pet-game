@@ -61,7 +61,8 @@ export class CleanMinigame extends Component {
     this.actionBtn = new UiButton(this.node, 'Action', 'Start', 0, -140, 320, 80, COLORS.clean, () => {
       this.onAction();
     });
-    new UiButton(this.node, 'Back', 'Back', 0, -240, 240, 68, COLORS.panelAlt, () => this.nav?.back());
+    new UiButton(this.node, 'Home', 'Home', -140, -240, 220, 68, COLORS.panelAlt, () => this.nav?.home());
+    new UiButton(this.node, 'Back', 'Back', 140, -240, 220, 68, COLORS.panelAlt, () => this.nav?.back());
     this.renderStep();
   }
 

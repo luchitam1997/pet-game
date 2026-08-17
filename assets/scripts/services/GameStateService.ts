@@ -191,6 +191,14 @@ export class GameStateService {
     return { ok: true, message: `Equipped ${cosmetic.displayName} on ${slot}.` };
   }
 
+  buyCosmetic(cosmeticId: string): ActionResult {
+    return this.buyCatalogItem('cosmetic', cosmeticId);
+  }
+
+  buyFurniture(furnitureId: string): ActionResult {
+    return this.buyCatalogItem('furniture', furnitureId);
+  }
+
   unequip(slot: CosmeticSlot): ActionResult {
     const pet = this.requireSelectedPet();
     if (!pet.equipped[slot]) {
@@ -229,9 +237,15 @@ export class GameStateService {
       return fail(check.reason);
     }
 
+    const previousId = state.room.placements[anchor];
+    let movedFrom: RoomAnchor | null = null;
     for (const [existingAnchor, placedId] of Object.entries(state.room.placements)) {
       if (placedId === furnitureId) {
-        delete state.room.placements[existingAnchor as RoomAnchor];
+        const from = existingAnchor as RoomAnchor;
+        if (from !== anchor) {
+          movedFrom = from;
+        }
+        delete state.room.placements[from];
       }
     }
 
@@ -240,7 +254,65 @@ export class GameStateService {
     this.bumpObjective('place', state.selectedPetId ?? undefined);
     this.persist();
     gameEvents.emit('room:changed', { placements: { ...state.room.placements } });
+
+    if (previousId && previousId !== furnitureId) {
+      const previous = getFurniture(previousId);
+      return {
+        ok: true,
+        message: `Replaced ${previous?.displayName ?? 'item'} with ${furniture.displayName} on ${anchor}.`,
+      };
+    }
+    if (movedFrom) {
+      return { ok: true, message: `Moved ${furniture.displayName} from ${movedFrom} to ${anchor}.` };
+    }
     return { ok: true, message: `Placed ${furniture.displayName} on ${anchor}.` };
+  }
+
+  private buyCatalogItem(kind: 'cosmetic' | 'furniture', itemId: string): ActionResult {
+    const state = this.requireState();
+    if (kind === 'cosmetic') {
+      const cosmetic = getCosmetic(itemId);
+      if (!cosmetic) {
+        return fail(`Unknown cosmetic: ${itemId}`);
+      }
+      if (state.inventory.cosmetics.includes(itemId)) {
+        return fail(`You already own ${cosmetic.displayName}.`);
+      }
+      const price = cosmetic.priceCoins;
+      if (price === undefined) {
+        return fail(`${cosmetic.displayName} is not for sale.`);
+      }
+      if (state.coins < price) {
+        return fail(`Need ${price} coins for ${cosmetic.displayName}.`);
+      }
+      state.coins -= price;
+      state.inventory.cosmetics.push(itemId);
+      this.unlock(itemId);
+      this.persist();
+      this.emitPetCurrencyInventory('buy-cosmetic');
+      return { ok: true, message: `Bought ${cosmetic.displayName} for ${price} coins.` };
+    }
+
+    const furniture = getFurniture(itemId);
+    if (!furniture) {
+      return fail(`Unknown furniture: ${itemId}`);
+    }
+    if (state.inventory.furniture.includes(itemId)) {
+      return fail(`You already own ${furniture.displayName}.`);
+    }
+    const price = furniture.priceCoins;
+    if (price === undefined) {
+      return fail(`${furniture.displayName} is not for sale.`);
+    }
+    if (state.coins < price) {
+      return fail(`Need ${price} coins for ${furniture.displayName}.`);
+    }
+    state.coins -= price;
+    state.inventory.furniture.push(itemId);
+    this.unlock(itemId);
+    this.persist();
+    this.emitPetCurrencyInventory('buy-furniture');
+    return { ok: true, message: `Bought ${furniture.displayName} for ${price} coins.` };
   }
 
   private applyCareActivity(activityId: string, extraCoins = 0): ActionResult {

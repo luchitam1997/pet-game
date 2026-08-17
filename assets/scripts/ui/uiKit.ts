@@ -114,7 +114,7 @@ export class UiButton {
   private enabled = true;
   private onTap: () => void;
 
-  constructor(
+    constructor(
     parent: Node,
     name: string,
     text: string,
@@ -124,6 +124,7 @@ export class UiButton {
     height: number,
     color: Color,
     onTap: () => void,
+    fontSize = 24,
   ) {
     this.width = width;
     this.height = height;
@@ -138,7 +139,7 @@ export class UiButton {
       y: 0,
       width,
       height,
-      fontSize: 24,
+      fontSize,
       bold: true,
     });
     this.node.on(NodeEventType.TOUCH_END, this.handleTap, this);
